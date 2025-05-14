@@ -1,0 +1,23 @@
+{
+    "servers": {
+        "playwright": {
+            "type": "playwright",
+            "url": "http://localhost:3000",
+            "config": {
+                "browser": {
+                    "type": "chromium",
+                    "headless": true
+                }
+            }
+        },
+        "custom": {
+            "type": "custom",
+            "url": "http://your-custom-server:port",
+            "config": {
+                "auth_token": "your-auth-token",
+                "additional_settings": {}
+            }
+        }
+    },
+    "default_server": "playwright"
+}
