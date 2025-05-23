@@ -1,0 +1,19 @@
+{
+    "sampleproj": [
+      {
+        "number": 1,
+        "title": "Add new feature X",
+        "author": "alice",
+        "head_commit": "abc123",
+        "summary": "Adds feature X and updates documentation."
+      },
+      {
+        "number": 2,
+        "title": "Fix bug Y",
+        "author": "bob",
+        "head_commit": "def456",
+        "summary": "Fixes a critical bug in module Y."
+      }
+    ]
+  }
+  

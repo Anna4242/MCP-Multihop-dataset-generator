@@ -1,0 +1,80 @@
+# fake_github_server.py
+from fastmcp import FastMCP
+import os, json
+
+mcp = FastMCP("Fake GitHub")
+with open("fixtures/github_PRs.json") as f:
+    PR_DATA = json.load(f)
+
+REPO_BASE = os.path.abspath("fixtures/repos")  # base path where repos are stored
+DIFF_BASE = os.path.abspath("fixtures/diffs")  # base path for diff files
+
+@mcp.tool()
+def clone_repo(repo_url: str) -> str:
+    """
+    Simulate cloning a repository. Here repo_url might just be a name or path for simplicity.
+    Returns a message or path.
+    """
+    # We'll treat repo_url as the repo name for fixture lookup (e.g., "sampleproj")
+    repo_name = os.path.basename(repo_url.rstrip("/"))
+    repo_path = os.path.join(REPO_BASE, repo_name)
+    if os.path.isdir(repo_path):
+        # Simulate success
+        return f"Cloned repository '{repo_name}' into /repos/{repo_name}"
+    else:
+        return f"[Error] Repository '{repo_name}' not found in fixtures."
+
+@mcp.tool()
+def list_pull_requests(repo: str) -> list:
+    """
+    List open PRs for the given repo.
+    :param repo: Repository name.
+    :return: List of PR info dicts.
+    """
+    prs = PR_DATA.get(repo)
+    if not prs:
+        return []
+    # We won't include diff here to keep it concise; just basic info
+    return [{"number": pr["number"], "title": pr["title"], "author": pr["author"], 
+             "head_commit": pr.get("head_commit")} for pr in prs]
+
+@mcp.tool()
+def get_pull_request(repo: str, number: int) -> dict:
+    """
+    Get details of a specific PR, including summary and diff.
+    :param repo: Repository name.
+    :param number: PR number.
+    :return: PR details dict, possibly with diff included.
+    """
+    prs = PR_DATA.get(repo)
+    if not prs:
+        return {"error": "Repository not found or no PRs."}
+    for pr in prs:
+        if pr["number"] == number:
+            # Read diff file for this PR if exists
+            diff_file = os.path.join(DIFF_BASE, f"{repo}_pr{number}.diff")
+            diff_text = ""
+            if os.path.isfile(diff_file):
+                with open(diff_file, "r") as df:
+                    diff_text = df.read()
+            return {
+                "number": pr["number"],
+                "title": pr["title"],
+                "author": pr["author"],
+                "summary": pr.get("summary", ""),
+                "diff": diff_text if diff_text else "[Diff not available]"
+            }
+    return {"error": f"PR #{number} not found for repo {repo}"}
+
+@mcp.tool()
+def get_commit_diff(repo: str, commit_id: str) -> str:
+    """
+    Get the diff for a specific commit (by commit hash or ID).
+    """
+    diff_file = os.path.join(DIFF_BASE, f"{commit_id}.diff")
+    if os.path.isfile(diff_file):
+        with open(diff_file, "r") as df:
+            diff_text = df.read()
+            return diff_text
+    else:
+        return f"[Error] Diff for commit {commit_id} not found."
