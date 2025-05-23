@@ -1,21 +1,11 @@
-# mcp_env/rl/dynamic_mcp_environment.py
-"""
-Dynamic MCP RL Environment that adapts to available servers and provides
-a reinforcement learning interface for training LLMs with tool use.
-"""
-
 import json
 from pathlib import Path
 from typing import Dict, List, Any, Tuple
 from dataclasses import dataclass
 
-try:
-    from .mcp_tool_executor import DynamicMCPToolExecutor
-    from .dynamic_task_generator import DynamicTaskGenerator
-except ImportError:
-    # Handle direct execution
-    from mcp_tool_executor import DynamicMCPToolExecutor
-    from dynamic_task_generator import DynamicTaskGenerator
+from .mcp_tool_executor import DynamicMCPToolExecutor
+from .dynamic_task_generator import DynamicTaskGenerator
+from .reward_generator import RewardGenerator, RewardConfig
 
 @dataclass
 class MCPState:
@@ -53,11 +43,22 @@ class MCPState:
 class DynamicMCPEnvironment:
     """Dynamic RL Environment that adapts to available MCP servers."""
     
-    def __init__(self, max_steps: int = 10, servers_dir: Path = None):
+    def __init__(
+        self, 
+        max_steps: int = 10, 
+        servers_dir: Path = None,
+        reward_config: RewardConfig = None,
+        use_llm_rewards: bool = False
+    ):
         self.max_steps = max_steps
         self.tool_executor = DynamicMCPToolExecutor(servers_dir)
         self.task_generator = DynamicTaskGenerator(self.tool_executor)
         self.state = None
+        
+        # Initialize reward generator
+        if reward_config is None:
+            reward_config = RewardConfig(use_llm_rewards=use_llm_rewards)
+        self.reward_generator = RewardGenerator(reward_config)
         
         # Print initialization summary
         self._print_initialization_summary()
@@ -73,6 +74,7 @@ class DynamicMCPEnvironment:
         print(f"📊 Summary:")
         print(f"   • Servers loaded: {len(servers)}")
         print(f"   • Total tools: {len(tools)}")
+        print(f"   • Reward Generator: {'LLM-based' if self.reward_generator.config.use_llm_rewards else 'Heuristic'}")
         
         if servers:
             print(f"\n🖥️ Available Servers:")
@@ -125,6 +127,9 @@ class DynamicMCPEnvironment:
             if not tool_name:
                 return self._handle_invalid_action("Missing tool name")
             
+            # Check if this is an answer action
+            is_answer = (tool_name == "answer")
+            
             # Execute tool
             result = self.tool_executor.execute_tool(tool_name, args)
             
@@ -138,23 +143,31 @@ class DynamicMCPEnvironment:
                 "content": f"Result: {json.dumps(result)}"
             })
             
-            # Check if this was an answer action
-            if tool_name == "answer":
-                return self._handle_answer_action(result, args)
+            # Calculate reward using the reward generator
+            done = (is_answer or self.state.step >= self.max_steps)
+            
+            reward, reward_info = self.reward_generator.calculate_reward(
+                action=action_data,
+                result=result,
+                state=self.state,
+                done=done,
+                is_answer=is_answer
+            )
+            
+            # Add reward info to result
+            info = {"result": result, "reward_info": reward_info}
+            
+            # Handle answer action
+            if is_answer:
+                info["answer"] = args.get("answer", "")
+                info["task_completed"] = True
+                info["steps_taken"] = self.state.step
             
             # Check for errors
             if "error" in result:
-                reward = -0.3  # Penalty for errors
-                return self.state.to_observation(), reward, False, {"error": result["error"]}
+                info["error"] = result["error"]
             
-            # Normal step reward
-            reward = -0.01  # Small step penalty to encourage efficiency
-            done = self.state.step >= self.max_steps
-            
-            if done:
-                reward = -0.1  # Penalty for not completing task
-            
-            return self.state.to_observation(), reward, done, {"result": result}
+            return self.state.to_observation(), reward, done, info
             
         except json.JSONDecodeError:
             return self._handle_invalid_action("Invalid JSON format")
@@ -167,33 +180,11 @@ class DynamicMCPEnvironment:
             "role": "system",
             "content": f"Error: {error_msg}"
         })
-        return self.state.to_observation(), -0.5, True, {"error": error_msg}
-    
-    def _handle_answer_action(self, result: Dict[str, Any], args: Dict[str, Any]) -> Tuple[str, float, bool, Dict[str, Any]]:
-        """Handle answer actions and calculate final reward."""
-        answer = args.get("answer", "")
         
-        # Simple reward based on answer length and task completion
-        reward = self._calculate_answer_reward(answer)
+        # Use reward generator for invalid action
+        reward = self.reward_generator.config.invalid_action_penalty
         
-        return self.state.to_observation(), reward, True, {
-            "answer": answer,
-            "task_completed": True,
-            "steps_taken": self.state.step
-        }
-    
-    def _calculate_answer_reward(self, answer: str) -> float:
-        """Calculate reward for the final answer."""
-        base_reward = 0.5
-        
-        # Bonus for reasonable answer length
-        if 10 <= len(answer) <= 500:
-            base_reward += 0.3
-        
-        # Bonus for efficiency (fewer steps)
-        efficiency_bonus = max(0, (self.max_steps - self.state.step) * 0.1)
-        
-        return base_reward + efficiency_bonus
+        return self.state.to_observation(), reward, True, {"error": error_msg}
     
     def get_environment_info(self) -> Dict[str, Any]:
         """Get comprehensive information about the environment."""
@@ -210,52 +201,6 @@ class DynamicMCPEnvironment:
             "available_tools": self.tool_executor.get_available_tools(),
             "task_types": self.task_generator.get_available_task_types(),
             "action_format": '{"tool": "tool_name", "args": {"param": "value"}}',
-            "max_steps": self.max_steps
+            "max_steps": self.max_steps,
+            "reward_type": "llm" if self.reward_generator.config.use_llm_rewards else "heuristic"
         }
-
-# Test function
-def test_dynamic_environment():
-    """Test the dynamic MCP environment."""
-    print("🧪 TESTING DYNAMIC MCP ENVIRONMENT")
-    print("=" * 60)
-    
-    # Create environment - it will auto-discover servers
-    env = DynamicMCPEnvironment(max_steps=8)
-    
-    # Get environment info
-    env_info = env.get_environment_info()
-    print(f"\n📋 Environment Info:")
-    print(f"   Total tools: {env_info['total_tools']}")
-    print(f"   Available tools: {env_info['available_tools']}")
-    
-    # Test with different task types
-    available_task_types = env_info['task_types']
-    
-    for task_type in available_task_types[:3]:  # Test first 3 task types
-        print(f"\n🎯 Testing {task_type} task:")
-        
-        obs = env.reset(task_type=task_type)
-        print(f"   Task generated successfully")
-        
-        # Try one action to verify everything works
-        available_tools = env.tool_executor.get_available_tools()
-        if available_tools:
-            # Pick the first non-answer tool
-            test_tool = next((t for t in available_tools if t != "answer"), "answer")
-            
-            if test_tool != "answer":
-                # Create a simple test action
-                if "search" in test_tool:
-                    action = json.dumps({"tool": test_tool, "args": {"query": "test"}})
-                elif "list" in test_tool:
-                    action = json.dumps({"tool": test_tool, "args": {"path": "/"}})
-                else:
-                    action = json.dumps({"tool": test_tool, "args": {}})
-            else:
-                action = json.dumps({"tool": "answer", "args": {"answer": "Test completed"}})
-            
-            obs, reward, done, info = env.step(action)
-            print(f"   Action executed: {test_tool}, Reward: {reward:.3f}")
-
-if __name__ == "__main__":
-    test_dynamic_environment()
