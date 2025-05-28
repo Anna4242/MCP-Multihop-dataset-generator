@@ -1,0 +1,47 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"],
+      "env": {
+        "DISPLAY": ":1"
+      }
+    },
+    "airbnb": {
+      "command": "npx",
+      "args": ["-y", "@openbnb/mcp-server-airbnb", "--ignore-robots-txt"]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "${workspaceFolder}"
+      ]
+    },
+    "calculator": {
+      "command": "uvx",
+      "args": ["mcp-server-calculator"]
+    },
+    "math": {
+      "command": "npx",
+      "args": ["-y", "@smithery/cli", "install", "@EthanHenrickson/math-mcp", "--client", "claude"]
+    },
+    "web-search": {
+      "command": "npx",
+      "args": ["-y", "web-search-mcp"]
+    },
+    "coincap": {
+      "command": "npx",
+      "args": ["coincap-mcp"]
+    },
+    "time": {
+      "command": "uvx",
+      "args": ["mcp-server-time"]
+    },
+    "pollinations": {
+      "command": "npx",
+      "args": ["-y", "@pinkpixel/mcpollinations"]
+    }
+  }
+}

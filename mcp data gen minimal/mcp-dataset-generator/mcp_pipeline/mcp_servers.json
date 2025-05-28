@@ -1,0 +1,70 @@
+{
+    "inputs": [
+      {
+        "type": "promptString",
+        "id": "github_token",
+        "description": "GitHub PAT",
+        "password": true
+      }
+    ],
+  
+    "mcpServers": {
+      "github": {
+        "connector": "stdio",
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "@modelcontextprotocol/server-github"
+        ],
+        "env": {
+          "GITHUB_PERSONAL_ACCESS_TOKEN": ""
+        }
+      },
+  
+      "filesystem": {
+        "connector": "stdio",
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "@modelcontextprotocol/server-filesystem",
+          "D:\\one drive\\study\\ARCEE AI INTERNSHIP\\mcp data gen minimal"
+        ]
+      },
+  
+      "memory": {
+        "connector": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-memory"
+        ]
+      },
+  
+      "playwright": {
+        "connector": "stdio",
+        "command": "npx",
+        "args": [
+          "@playwright/mcp@latest"
+        ],
+        "env": {
+          "DISPLAY": ":1"
+        }
+      },
+  
+      "sequential-thinking": {
+        "connector": "stdio",
+        "command": "cmd",
+        "args": [
+          "/c",
+          "npx",
+          "-y",
+          "@modelcontextprotocol/server-sequential-thinking"
+        ]
+      }
+    }
+  }
+  
