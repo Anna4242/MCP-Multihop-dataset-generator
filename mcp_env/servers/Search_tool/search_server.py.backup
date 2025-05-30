@@ -1,0 +1,35 @@
+# fake_search_server.py
+from fastmcp import FastMCP
+import json, random
+
+mcp = FastMCP("Fake Web Search")  # Create MCP server instance
+
+# Load search fixtures once at startup
+with open("D:\one drive\study\ARCEE AI INTERNSHIP\mcp data gen minimal\mcp-dataset-generator\mcp_env\servers\Search_tool\fixtures/search_results.json") as f:
+    SEARCH_DATA = json.load(f)
+
+@mcp.tool()
+def web_search(query: str, noisy: bool = False) -> list:
+    """
+    Fake web search tool that returns a list of search results for the query.
+    :param query: Search query string.
+    :param noisy: If True, inject random noise in the results (e.g., shuffle or add random result).
+    :return: A list of result dicts {title, url, snippet}.
+    """
+    # Deterministic lookup
+    results = SEARCH_DATA.get(query)
+    if results is None:
+        # If query not found, return an empty list or a default message
+        return []
+    # Optionally add noise
+    results_copy = list(results)  # copy to avoid altering the fixture
+    if noisy:
+        random.shuffle(results_copy)  # randomize order as noise
+        # 10% chance to add a fake filler result
+        if random.random() < 0.1:
+            results_copy.append({
+                "title": "Related Search",
+                "url": "https://example.com/search?q=" + query,
+                "snippet": f"Explore more results for \"{query}\"."
+            })
+    return results_copy

@@ -1,0 +1,62 @@
+{
+  "MCP protocol": [
+    {
+      "title": "Model Context Protocol - Official Site",
+      "url": "https://modelcontextprotocol.io",
+      "snippet": "The Model Context Protocol (MCP) is an open standard that enables seamless integration between LLMs and external data sources."
+    },
+    {
+      "title": "MCP Introduction - Anthropic",
+      "url": "https://www.anthropic.com/news/model-context-protocol",
+      "snippet": "Anthropic introduces the Model Context Protocol, a new standard for connecting AI assistants to data sources."
+    }
+  ],
+  "reinforcement learning": [
+    {
+      "title": "Reinforcement Learning: An Introduction",
+      "url": "https://web.stanford.edu/class/psych209/Readings/SuttonBartoIPRLBook2ndEd.pdf",
+      "snippet": "A comprehensive introduction to reinforcement learning methods and algorithms."
+    },
+    {
+      "title": "Deep Reinforcement Learning",
+      "url": "https://arxiv.org/abs/1709.07809",
+      "snippet": "Overview of deep reinforcement learning techniques and applications."
+    }
+  ],
+  "Python programming": [
+    {
+      "title": "Python.org - Official Website",
+      "url": "https://www.python.org",
+      "snippet": "The official home of the Python programming language."
+    },
+    {
+      "title": "Python Tutorial",
+      "url": "https://docs.python.org/3/tutorial/",
+      "snippet": "The official Python tutorial covering language basics and advanced topics."
+    }
+  ],
+  "machine learning": [
+    {
+      "title": "Scikit-learn Documentation",
+      "url": "https://scikit-learn.org/stable/",
+      "snippet": "Machine learning library for Python with simple and efficient tools for data analysis."
+    },
+    {
+      "title": "Machine Learning Course - Stanford",
+      "url": "https://cs229.stanford.edu/",
+      "snippet": "Stanford's machine learning course materials and lectures."
+    }
+  ],
+  "artificial intelligence": [
+    {
+      "title": "AI Research - OpenAI",
+      "url": "https://openai.com/research/",
+      "snippet": "Latest research and developments in artificial intelligence from OpenAI."
+    },
+    {
+      "title": "AI News - MIT Technology Review",
+      "url": "https://www.technologyreview.com/topic/artificial-intelligence/",
+      "snippet": "Latest news and analysis on artificial intelligence developments."
+    }
+  ]
+}
