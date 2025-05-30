@@ -1,0 +1,11 @@
+2025-05-29 21:08:18,916 - __main__ - ERROR - File not found: queries.json
+2025-05-29 21:08:18,916 - __main__ - ERROR - No valid queries found in queries.json
+2025-05-29 21:08:18,924 - __main__ - INFO - Final captured output saved to verbose_output\final_output_20250529_210818.json
+2025-05-29 21:08:18,926 - mcp_use - WARNING - Error closing client session: Attempted to exit a cancel scope that isn't the current tasks's current cancel scope
+2025-05-29 21:08:18,927 - mcp_use - WARNING - Encountered 1 errors during resource cleanup
+2025-05-29 21:08:18,928 - mcp_use - WARNING - Error closing client session: Attempted to exit a cancel scope that isn't the current tasks's current cancel scope
+2025-05-29 21:08:18,930 - mcp_use - WARNING - Encountered 1 errors during resource cleanup
+2025-05-29 21:08:18,931 - mcp_use - WARNING - Error closing client session: Attempted to exit a cancel scope that isn't the current tasks's current cancel scope
+2025-05-29 21:08:18,933 - mcp_use - WARNING - Encountered 1 errors during resource cleanup
+2025-05-29 21:08:18,934 - mcp_use - WARNING - Error closing client session: Attempted to exit a cancel scope that isn't the current tasks's current cancel scope
+2025-05-29 21:08:18,935 - mcp_use - WARNING - Encountered 1 errors during resource cleanup
