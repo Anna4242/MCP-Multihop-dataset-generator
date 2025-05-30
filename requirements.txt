@@ -1,0 +1,17 @@
+mcp-use>=0.1.0
+
+
+# Core dependencies with specific versions
+openai==1.12.0
+httpx==0.25.2
+httpcore==1.0.2
+python-dotenv==1.0.0
+langchain==0.1.0
+langchain-openai==0.0.5
+pandas==2.1.4
+requests==2.31.0
+pydantic==2.5.0
+
+# MCP dependencies
+mcp
+fastmcp
